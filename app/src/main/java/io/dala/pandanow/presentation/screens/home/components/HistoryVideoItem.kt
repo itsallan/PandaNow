@@ -1,4 +1,4 @@
-package io.dala.pandanow.presentation.components
+package io.dala.pandanow.presentation.screens.home.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,16 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import io.dala.pandanow.data.VideoHistoryItem
+import io.dala.pandanow.presentation.components.formatDuration
+import io.dala.pandanow.utils.getTimeAgo
 
 @Composable
 fun HistoryVideoItem(
     video: VideoHistoryItem,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,11 +61,9 @@ fun HistoryVideoItem(
                     .size(80.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
-                // Generate a unique but consistent thumbnail from the video title
-                val thumbnailData = "/api/placeholder/160/90?text=${video.title.take(2)}"
-
+                // Try to load thumbnail
                 AsyncImage(
-                    model = thumbnailData,
+                    model = "/api/placeholder/160/90?text=${video.title.take(2)}",
                     contentDescription = video.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -174,19 +177,5 @@ fun HistoryVideoItem(
                 )
             }
         }
-    }
-}
-
-// Helper function to format time ago
-fun getTimeAgo(timestamp: Long): String {
-    val now = System.currentTimeMillis()
-    val diff = now - timestamp
-
-    return when {
-        diff < 60 * 1000 -> "Just now"
-        diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)}m ago"
-        diff < 24 * 60 * 60 * 1000 -> "${diff / (60 * 60 * 1000)}h ago"
-        diff < 7 * 24 * 60 * 60 * 1000 -> "${diff / (24 * 60 * 60 * 1000)}d ago"
-        else -> "${diff / (7 * 24 * 60 * 60 * 1000)}w ago"
     }
 }
