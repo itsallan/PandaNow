@@ -37,7 +37,7 @@ import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
-    var videoUrl by remember { mutableStateOf("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4") }
+    var videoUrl by remember { mutableStateOf("https://cdn.flowplayer.com/a30bd6bc-f98b-47bc-abf5-97633d4faea0/hls/de3f6ca7-2db3-4689-8160-0f574a5996ad/playlist.m3u8") }
     var title by remember { mutableStateOf("test") }
     var subtitle by remember { mutableStateOf("test 2") }
     var subtitleUrl by remember { mutableStateOf("") }

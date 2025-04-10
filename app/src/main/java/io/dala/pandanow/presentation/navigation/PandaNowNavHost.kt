@@ -10,21 +10,24 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.dala.pandanow.presentation.screens.home.HomeScreen
 import io.dala.pandanow.presentation.screens.player.VideoPlayerScreen
+import io.dala.pandanow.presentation.theme.PandaNowTheme
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PandaNowNavHost() {
     val navController: NavHostController = rememberNavController()
-    NavHost(
-    navController = navController,
-    startDestination = HomeRoute
-    ) {
-        composable<HomeRoute> {
-            HomeScreen(navController)
-        }
-        composable<VideoPlayerRoute> {
-            val details = it.toRoute<VideoPlayerRoute>()
-            VideoPlayerScreen(details, navController)
+    PandaNowTheme {
+        NavHost(
+            navController = navController,
+            startDestination = HomeRoute
+        ) {
+            composable<HomeRoute> {
+                HomeScreen(navController)
+            }
+            composable<VideoPlayerRoute> {
+                val details = it.toRoute<VideoPlayerRoute>()
+                VideoPlayerScreen(details, navController)
+            }
         }
     }
 }

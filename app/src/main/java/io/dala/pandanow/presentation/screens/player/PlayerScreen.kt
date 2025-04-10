@@ -10,8 +10,8 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
+import android.util.Log
 import android.util.Rational
-import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -73,7 +73,7 @@ fun Context.findActivity(): Activity? {
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) {
+fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) {
     val viewModel: VideoPlayerViewModel = viewModel()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -113,7 +113,6 @@ fun VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) {
             setRewardedAd
         )
     }
-
     // Set default orientation to landscape
     LaunchedEffect(Unit) {
         context.findActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -125,8 +124,11 @@ fun VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) {
             showQualityOptions = false
         }
     }
-    Toast.makeText(context, details.videoUrl, Toast.LENGTH_SHORT).show()
 
+    LaunchedEffect(details.videoUrl) {
+        viewModel.setMediaItem(uri = details.videoUrl, subtitleUri =  details.subtitleUrl)
+        Log.d("Subtitles", "Subtitle track Link: ${details.subtitleUrl}")
+    }
     // Handle lifecycle events
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
