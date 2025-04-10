@@ -126,11 +126,22 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
     }
 
     LaunchedEffect(details.videoUrl) {
-        viewModel.setMediaItem(uri = details.videoUrl, subtitleUri =  details.subtitleUrl)
-        Log.d("Subtitles", "Subtitle track Link: ${details.subtitleUrl}")
+        // Set the media URL to start playback
+        viewModel.setMediaItem(details.videoUrl, details.subtitleUrl)
+        // Save to history when playback starts
+        viewModel.saveToHistory(details.title, details.subtitle, details.subtitleUrl)
+    }
+
+// Also add this effect to update progress periodically
+    LaunchedEffect(player, isPlaying) {
+        while (isPlaying && player != null) {
+            viewModel.saveCurrentPosition()
+            delay(30000) // Update every 30 seconds
+        }
     }
     // Handle lifecycle events
     DisposableEffect(lifecycleOwner) {
+        viewModel.saveCurrentPosition()
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {

@@ -28,7 +28,9 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import io.dala.pandanow.data.VideoHistoryItem
 import io.dala.pandanow.utils.CacheManager
+import io.dala.pandanow.utils.VideoHistoryManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -254,20 +256,61 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    private fun getSavedPosition(uri: String): Long {
-        return sharedPreferences.getLong(uri, 0L)
+    fun saveToHistory(title: String, subtitle: String?, subtitleUrl: String? = null) {
+        currentUrl.value?.let { url ->
+            player.value?.let { exoPlayer ->
+                if (exoPlayer.playbackState == Player.STATE_READY || exoPlayer.playbackState == Player.STATE_ENDED) {
+                    val currentPosition = exoPlayer.currentPosition
+                    val duration = exoPlayer.duration
+
+                    val historyItem = VideoHistoryItem(
+                        videoUrl = url,
+                        title = title,
+                        subtitle = subtitle,
+                        subtitleUrl = subtitleUrl,
+                        lastPosition = currentPosition,
+                        duration = duration,
+                        timestamp = System.currentTimeMillis()
+                    )
+
+                    VideoHistoryManager.getInstance(context).saveVideoToHistory(historyItem)
+                }
+            }
+        }
     }
 
+    // Modify the saveCurrentPosition method to also update history
     fun saveCurrentPosition() {
         player.value?.let { exoPlayer ->
             currentUrl.value?.let { url ->
                 if (exoPlayer.playbackState == Player.STATE_READY || exoPlayer.playbackState == Player.STATE_ENDED) {
                     val currentPosition = exoPlayer.currentPosition
+                    val duration = exoPlayer.duration
+
+                    // Save to SharedPreferences for resuming specific videos
                     sharedPreferences.edit().putLong(url, currentPosition).apply()
+
+                    // Update in history with progress
+                    VideoHistoryManager.getInstance(context).updateVideoProgress(url, currentPosition, duration)
                 }
             }
         }
     }
+
+    private fun getSavedPosition(uri: String): Long {
+        return sharedPreferences.getLong(uri, 0L)
+    }
+
+//    fun saveCurrentPosition() {
+//        player.value?.let { exoPlayer ->
+//            currentUrl.value?.let { url ->
+//                if (exoPlayer.playbackState == Player.STATE_READY || exoPlayer.playbackState == Player.STATE_ENDED) {
+//                    val currentPosition = exoPlayer.currentPosition
+//                    sharedPreferences.edit().putLong(url, currentPosition).apply()
+//                }
+//            }
+//        }
+//    }
 
     fun toggleControlsVisibility() {
         _areControlsVisible.value = !_areControlsVisible.value
