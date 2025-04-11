@@ -22,7 +22,7 @@ fun AdmobBanner(modifier: Modifier = Modifier) {
         factory = { context ->
             AdView(context).apply {
                 setAdSize(AdSize.FULL_BANNER)
-                adUnitId = "ca-app-pub-3940256099942544/6300978111"
+                adUnitId = "ca-app-pub-8434908166696065/6303533940"
                 loadAd(AdRequest.Builder().build())
             }
         }
@@ -36,7 +36,7 @@ fun MediumAdmobBanner(modifier: Modifier = Modifier) {
         factory = { context ->
             AdView(context).apply {
                 setAdSize(AdSize.MEDIUM_RECTANGLE)
-                adUnitId = "ca-app-pub-3940256099942544/6300978111"
+                adUnitId = "ca-app-pub-8434908166696065/6303533940"
                 loadAd(AdRequest.Builder().build())
             }
         }
@@ -49,7 +49,7 @@ var mInterstitialAd: InterstitialAd? = null
 fun loadInterstitial(context: Context) {
     InterstitialAd.load(
         context,
-        "ca-app-pub-3940256099942544/1033173712",
+        "ca-app-pub-8434908166696065/3677370601",
         AdRequest.Builder().build(),
         object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {

@@ -38,6 +38,10 @@ import androidx.navigation.NavController
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Settings
 import io.dala.pandanow.data.VideoHistoryItem
+import io.dala.pandanow.presentation.components.ads.MediumAdmobBanner
+import io.dala.pandanow.presentation.components.ads.loadInterstitial
+import io.dala.pandanow.presentation.components.ads.showInterstitial
+import io.dala.pandanow.presentation.navigation.SettingsRoute
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
 import io.dala.pandanow.presentation.screens.home.components.AddVideoScreen
 import io.dala.pandanow.presentation.screens.home.components.ContinueWatchingCard
@@ -97,6 +101,7 @@ fun HomeScreen(navController: NavController) {
                 val simpleName = videoUrl.substringAfterLast('/')
                     .substringBeforeLast('.')
                     .replace("%20", " ")
+                    .replace("%21", " ")
 
                 if (title.isEmpty() && simpleName.isNotEmpty()) {
                     title = formatFilenameToTitle(simpleName)
@@ -154,6 +159,8 @@ fun HomeScreen(navController: NavController) {
                     showAddVideoScreen = false
 
                     // Navigate to player
+                    loadInterstitial(context)
+                    showInterstitial(context)
                     navController.navigate(
                         VideoPlayerRoute(
                             videoUrl = videoUrl,
@@ -183,7 +190,7 @@ fun HomeScreen(navController: NavController) {
                         titleContentColor = MaterialTheme.colorScheme.primary
                     ),
                     actions = {
-                        IconButton(onClick = {}) {
+                        IconButton(onClick = { navController.navigate(SettingsRoute) }) {
                             Icon(TablerIcons.Settings, contentDescription = "Settings")
                         }
                     }
@@ -245,6 +252,8 @@ fun HomeScreen(navController: NavController) {
                                     ContinueWatchingCard(
                                         video = video,
                                         onPlayClick = {
+                                            loadInterstitial(context)
+                                            showInterstitial(context)
                                             navController.navigate(
                                                 VideoPlayerRoute(
                                                     videoUrl = video.videoUrl,
@@ -288,6 +297,8 @@ fun HomeScreen(navController: NavController) {
                             HistoryVideoItem(
                                 video = video,
                                 onClick = {
+                                    loadInterstitial(context)
+                                    showInterstitial(context)
                                     navController.navigate(
                                         VideoPlayerRoute(
                                             videoUrl = video.videoUrl,
@@ -298,6 +309,17 @@ fun HomeScreen(navController: NavController) {
                                     )
                                 }
                             )
+                        }
+                        item {
+                            Column(
+                               modifier = Modifier
+                                   .fillMaxSize()
+                                   .padding(16.dp),
+                               horizontalAlignment = Alignment.CenterHorizontally,
+                               verticalArrangement = Arrangement.Center
+                            ) {
+                                MediumAdmobBanner()
+                            }
                         }
 
                         item {

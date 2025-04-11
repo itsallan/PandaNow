@@ -11,7 +11,7 @@ class MyApplication : Application() {
         super.onCreate()
         MobileAds.initialize(this) {}
         appOpenAdManager = AppOpenAdManager(
-            adUnit = "ca-app-pub-3940256099942544/3419835294",
+            adUnit = "ca-app-pub-8434908166696065/7065117124",
             application = this
         )
     }
