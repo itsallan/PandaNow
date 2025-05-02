@@ -109,7 +109,7 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
     LaunchedEffect(Unit) {
         loadRewardedAd(
             context,
-            "ca-app-pub-8434908166696065/8857545094",
+            "ca-app-pub-6822790457668840/7331886021",
             setRewardedAd
         )
     }
