@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="app/src/main/ic_launcher-playstore.png", width=160 height=160  align="center">
+  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp", width=160 height=160  align="center">
 
 # PandaNow 
 
