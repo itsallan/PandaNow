@@ -3,8 +3,6 @@
 
 # PandaNow 
 
-### Video Player
-
 **PandaNow is a feature-rich, modern video player app for Android, designed to offer a seamless and customizable video watching experience. Currently, it focuses on playing video links, with future plans to support local device videos.**
 
 </div>
@@ -19,7 +17,6 @@
 </div>
 </div>
 
----
 ## 🌟 Features
 
 * **Advanced Video Playback:** Enjoy your videos with multiple quality options.
@@ -48,4 +45,4 @@ For any issues or questions, please feel free to [open an issue on GitHub](https
 
 >[!Warning]
 >
->Hey there! I'm the developer behind PandaNow. I'm relatively new to app development, with about one year of experience under my belt. As such, I'm still learning a >lot about **clean architecture** and best practices. If you're an experienced developer who knows a thing or two about building robust and scalable Android >applications, your contributions to improve the project's architecture would be incredibly valuable and appreciated!
+>Hey there! I'm the developer behind PandaNow. I'm relatively new to app development, with about one year of experience under my belt. As such, I'm still learning a lot about **clean architecture** and best practices. If you're an experienced developer who knows a thing or two about building robust and scalable Android applications, your contributions to improve the project's architecture would be incredibly valuable and appreciated!
