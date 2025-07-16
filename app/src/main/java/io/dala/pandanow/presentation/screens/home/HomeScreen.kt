@@ -38,9 +38,6 @@ import androidx.navigation.NavController
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Settings
 import io.dala.pandanow.data.VideoHistoryItem
-import io.dala.pandanow.presentation.components.ads.MediumAdmobBanner
-import io.dala.pandanow.presentation.components.ads.loadInterstitial
-import io.dala.pandanow.presentation.components.ads.showInterstitial
 import io.dala.pandanow.presentation.navigation.SettingsRoute
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
 import io.dala.pandanow.presentation.screens.home.components.AddVideoScreen
@@ -58,8 +55,6 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
-
-    // State
     var showAddVideoScreen by remember { mutableStateOf(false) }
     var videoUrl by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
@@ -83,21 +78,17 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(videoUrl) {
         if (autoExtractMetadata && videoUrl.isNotEmpty()) {
             try {
-                // Extract a title from the URL
                 val decodedUrl = URLDecoder.decode(videoUrl, StandardCharsets.UTF_8.toString())
                 val uri = URI(decodedUrl)
                 val path = uri.path
 
                 if (title.isEmpty() && path != null) {
-                    // Get filename from path
                     val filename = path.substring(path.lastIndexOf('/') + 1)
                         .substringBeforeLast(".")
 
-                    // Format the filename to a readable title
                     title = formatFilenameToTitle(filename)
                 }
             } catch (e: Exception) {
-                // If URL parsing fails, try a simpler approach
                 val simpleName = videoUrl.substringAfterLast('/')
                     .substringBeforeLast('.')
                     .replace("%20", " ")
@@ -137,14 +128,12 @@ fun HomeScreen(navController: NavController) {
                 videoUrlError = videoUrl.isEmpty()
 
                 if (!videoUrlError) {
-                    // Generate title if empty
                     val finalTitle = if (title.isEmpty()) {
                         "Untitled Video"
                     } else {
                         title
                     }
 
-                    // Save to history first so it appears immediately
                     val historyItem = VideoHistoryItem(
                         videoUrl = videoUrl,
                         title = finalTitle,
@@ -154,13 +143,9 @@ fun HomeScreen(navController: NavController) {
                     )
                     historyManager.saveVideoToHistory(historyItem)
 
-                    // Refresh history and close screen
                     videoHistory = historyManager.getVideoHistory()
                     showAddVideoScreen = false
 
-                    // Navigate to player
-                    loadInterstitial(context)
-                    showInterstitial(context)
                     navController.navigate(
                         VideoPlayerRoute(
                             videoUrl = videoUrl,
@@ -199,7 +184,6 @@ fun HomeScreen(navController: NavController) {
             floatingActionButton = {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        // Reset form fields when opening
                         videoUrl = ""
                         title = ""
                         subtitle = ""
@@ -221,7 +205,6 @@ fun HomeScreen(navController: NavController) {
                     .fillMaxSize()
             ) {
                 if (videoHistory.isEmpty()) {
-                    // Empty state
                     EmptyHistoryState(
                         onAddVideo = {
                             videoUrl = ""
@@ -234,14 +217,12 @@ fun HomeScreen(navController: NavController) {
                         }
                     )
                 } else {
-                    // Show history
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Continue watching section (if applicable)
                         continueWatchingVideo?.let { video ->
                             item {
                                 Column(
@@ -252,8 +233,6 @@ fun HomeScreen(navController: NavController) {
                                     ContinueWatchingCard(
                                         video = video,
                                         onPlayClick = {
-                                            loadInterstitial(context)
-                                            showInterstitial(context)
                                             navController.navigate(
                                                 VideoPlayerRoute(
                                                     videoUrl = video.videoUrl,
@@ -297,8 +276,6 @@ fun HomeScreen(navController: NavController) {
                             HistoryVideoItem(
                                 video = video,
                                 onClick = {
-                                    loadInterstitial(context)
-                                    showInterstitial(context)
                                     navController.navigate(
                                         VideoPlayerRoute(
                                             videoUrl = video.videoUrl,
@@ -310,20 +287,9 @@ fun HomeScreen(navController: NavController) {
                                 }
                             )
                         }
-                        item {
-                            Column(
-                               modifier = Modifier
-                                   .fillMaxSize()
-                                   .padding(16.dp),
-                               horizontalAlignment = Alignment.CenterHorizontally,
-                               verticalArrangement = Arrangement.Center
-                            ) {
-                                MediumAdmobBanner()
-                            }
-                        }
 
                         item {
-                            Spacer(modifier = Modifier.height(80.dp)) // Space for FAB
+                            Spacer(modifier = Modifier.height(80.dp))
                         }
                     }
                 }

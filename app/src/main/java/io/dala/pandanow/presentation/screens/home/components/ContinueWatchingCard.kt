@@ -75,9 +75,8 @@ fun ContinueWatchingCard(
                     .fillMaxWidth()
                     .height(220.dp)
             ) {
-                // Try to load thumbnail using the video URL - fallback to placeholder
                 SubcomposeAsyncImage(
-                    model = "/api/placeholder/800/450?text=${video.title.take(5)}",
+                    model = "",
                     contentDescription = video.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),

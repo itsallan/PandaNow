@@ -67,7 +67,7 @@ fun HistoryVideoItem(
                     .clip(RoundedCornerShape(8.dp))
             ) {
                 SubcomposeAsyncImage(
-                    model = "/api/placeholder/240/140?text=${video.title.take(2)}",
+                    model = "",
                     contentDescription = video.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
@@ -89,7 +89,6 @@ fun HistoryVideoItem(
                     }
                 )
 
-                // Play button overlay - smaller and subtle
                 Box(
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -204,7 +203,6 @@ fun HistoryVideoItem(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(start = 8.dp)
             ) {
-                // Time ago
                 val timeAgo = remember(video) {
                     getTimeAgo(video.timestamp)
                 }

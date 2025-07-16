@@ -60,7 +60,6 @@ fun SettingsScreen(navController: NavController) {
     val settingsManager = remember { SettingsManager.getInstance(context) }
     val historyManager = remember { VideoHistoryManager.getInstance(context) }
 
-    // Settings state - only include what actually works
     var autoExtractMetadata by remember { mutableStateOf(settingsManager.getAutoExtractMetadata()) }
     var darkMode by remember { mutableStateOf(settingsManager.getDarkMode()) }
 
@@ -192,7 +191,6 @@ fun SettingsScreen(navController: NavController) {
                                         .clickable {
                                             darkMode = theme
                                             settingsManager.setDarkMode(theme)
-                                            // Update ThemeStateManager to apply changes immediately
                                             ThemeStateManager.setThemeMode(theme)
                                             showDarkModeDialog = false
                                         }
@@ -203,7 +201,6 @@ fun SettingsScreen(navController: NavController) {
                                         onClick = {
                                             darkMode = theme
                                             settingsManager.setDarkMode(theme)
-                                            // Update ThemeStateManager to apply changes immediately
                                             ThemeStateManager.setThemeMode(theme)
                                             showDarkModeDialog = false
                                         }

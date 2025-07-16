@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -59,7 +58,6 @@ import compose.icons.tablericons.PlayerPlay
 import compose.icons.tablericons.PlayerSkipBack
 import compose.icons.tablericons.Speedboat
 import compose.icons.tablericons.ZodiacAquarius
-import io.dala.pandanow.presentation.components.ads.AdmobBanner
 import io.dala.pandanow.presentation.components.formatDuration
 import io.dala.pandanow.utils.getSpeedDescription
 import kotlinx.coroutines.delay
@@ -345,17 +343,6 @@ fun TvVideoControllerUI(
                             color = Color.White,
                             style = MaterialTheme.typography.labelSmall,
                         )
-
-                        Box(
-                            modifier = Modifier.weight(2f),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AdmobBanner(
-                                modifier = Modifier
-                                    .heightIn(min = 50.dp, max = 60.dp)
-                                    .fillMaxWidth(0.7f)
-                            )
-                        }
 
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(22.dp),

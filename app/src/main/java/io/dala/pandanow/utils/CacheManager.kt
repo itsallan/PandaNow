@@ -13,7 +13,7 @@ object CacheManager {
     fun getCache(context: Context): SimpleCache {
         if (simpleCache == null) {
             val cacheDir = File(context.cacheDir, "media")
-            val cacheSize = 100 * 1024 * 1024 // 100MB cache
+            val cacheSize = 100 * 1024 * 1024
             val cacheEvictor = LeastRecentlyUsedCacheEvictor(cacheSize.toLong())
             simpleCache = SimpleCache(cacheDir, cacheEvictor)
         }

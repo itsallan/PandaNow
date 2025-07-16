@@ -17,14 +17,8 @@ class VideoHistoryManager(context: Context) {
 
     fun saveVideoToHistory(video: VideoHistoryItem) {
         val history = getVideoHistory().toMutableList()
-
-        // Remove existing entry with the same URL if it exists
         history.removeIf { it.videoUrl == video.videoUrl }
-
-        // Add the new entry at the beginning
         history.add(0, video)
-
-        // Limit history to 10 items
         val limitedHistory = history.take(10)
 
         sharedPreferences.edit().apply {

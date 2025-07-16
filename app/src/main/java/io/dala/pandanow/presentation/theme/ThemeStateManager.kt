@@ -12,18 +12,13 @@ import io.dala.pandanow.utils.SettingsManager
  * Manages the theme state for the app to enable real-time theme changes
  */
 object ThemeStateManager {
-    // Private mutable state that can be updated
     private val _themeMode = mutableStateOf("System Default")
-
-    // Public immutable state that can be observed
     val themeMode: State<String> = _themeMode
 
-    // Update the theme mode and trigger recomposition
     fun setThemeMode(mode: String) {
         _themeMode.value = mode
     }
 
-    // Initialize from settings when the app starts
     fun initFromSettings(context: Context) {
         val settingsManager = SettingsManager.getInstance(context)
         _themeMode.value = settingsManager.getDarkMode()

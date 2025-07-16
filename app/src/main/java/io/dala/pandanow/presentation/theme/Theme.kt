@@ -30,7 +30,6 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40
 )
 
-// Create a composition local for theme mode
 val LocalThemeMode = compositionLocalOf { "System Default" }
 
 @Composable
@@ -40,10 +39,8 @@ fun PandaNowTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    // Use the theme state from our manager
     val themeMode by ThemeStateManager.themeMode
 
-    // Determine if dark theme should be used based on settings
     val useDarkTheme = when (themeMode) {
         "Dark" -> true
         "Light" -> false
@@ -68,7 +65,6 @@ fun PandaNowTheme(
         }
     }
 
-    // Provide the current theme mode to descendants
     CompositionLocalProvider(LocalThemeMode provides themeMode) {
         MaterialTheme(
             colorScheme = colorScheme,

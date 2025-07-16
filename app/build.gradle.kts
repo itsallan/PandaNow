@@ -73,11 +73,6 @@ dependencies {
     implementation(libs.androidx.tv.material)
     //serialization
     implementation(libs.kotlinx.serialization.json)
-    //Ads
-    implementation(libs.play.services.ads)
-    //InAppUpdate
-    implementation(libs.app.update)
-    implementation(libs.app.update.ktx)
     // Image Loading
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)

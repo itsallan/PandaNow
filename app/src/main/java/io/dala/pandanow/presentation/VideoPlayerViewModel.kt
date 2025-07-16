@@ -279,18 +279,13 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    // Modify the saveCurrentPosition method to also update history
     fun saveCurrentPosition() {
         player.value?.let { exoPlayer ->
             currentUrl.value?.let { url ->
                 if (exoPlayer.playbackState == Player.STATE_READY || exoPlayer.playbackState == Player.STATE_ENDED) {
                     val currentPosition = exoPlayer.currentPosition
                     val duration = exoPlayer.duration
-
-                    // Save to SharedPreferences for resuming specific videos
                     sharedPreferences.edit().putLong(url, currentPosition).apply()
-
-                    // Update in history with progress
                     VideoHistoryManager.getInstance(context).updateVideoProgress(url, currentPosition, duration)
                 }
             }

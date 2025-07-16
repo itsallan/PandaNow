@@ -1,6 +1,5 @@
 [versions]
 agp = "8.8.2"
-appUpdate = "2.1.0"
 coilCompose = "2.7.0"
 coilSvg = "2.6.0"
 datastorePreferences = "1.1.4"
@@ -17,7 +16,6 @@ materialIconsExtended = "1.7.8"
 media3Exoplayer = "1.6.0"
 navigationCompose = "2.8.9"
 composeIcons = "1.1.1"
-playServicesAds = "23.6.0"
 tvFoundation = "1.0.0-alpha12"
 tvMaterial = "1.0.0"
 lifecycleProcess = "2.8.7"
@@ -38,8 +36,6 @@ androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "medi
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-tv-foundation = { module = "androidx.tv:tv-foundation", version.ref = "tvFoundation" }
 androidx-tv-material = { module = "androidx.tv:tv-material", version.ref = "tvMaterial" }
-app-update = { module = "com.google.android.play:app-update", version.ref = "appUpdate" }
-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "appUpdate" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilSvg" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -57,7 +53,6 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 composeIcons-tablerIcons = { module = "br.com.devsrsouza.compose.icons:tabler-icons", version.ref = "composeIcons" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycleProcess" }
 
 [plugins]

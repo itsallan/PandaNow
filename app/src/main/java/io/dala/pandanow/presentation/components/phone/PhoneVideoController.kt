@@ -7,12 +7,39 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.FitScreen
+import androidx.compose.material.icons.filled.Forward10
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
+import androidx.compose.material.icons.filled.PhotoSizeSelectSmall
+import androidx.compose.material.icons.filled.PictureInPicture
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay10
+import androidx.compose.material.icons.filled.ScreenRotation
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
-import io.dala.pandanow.presentation.components.ads.AdmobBanner
 import io.dala.pandanow.presentation.components.formatDuration
 import io.dala.pandanow.utils.getSpeedDescription
 
@@ -261,21 +287,6 @@ fun PhoneVideoControllerUI(
                         )
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    if (isPortrait) {
-                        // AdMob banner above slider in portrait
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AdmobBanner(
-                                modifier = Modifier
-                                    .heightIn(min = 50.dp, max = 60.dp)
-                                    .fillMaxWidth(0.7f)
-                            )
-                        }
-                    }
                     Slider(
                         value = currentPosition.toFloat(),
                         onValueChange = { onSeekTo(it.toLong()) },
@@ -298,18 +309,6 @@ fun PhoneVideoControllerUI(
                             color = Color.White,
                             style = MaterialTheme.typography.labelSmall,
                         )
-                        if (!isPortrait) {
-                            Box(
-                                modifier = Modifier.weight(2f),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                AdmobBanner(
-                                    modifier = Modifier
-                                        .heightIn(min = 50.dp, max = 60.dp)
-                                        .fillMaxWidth(0.7f)
-                                )
-                            }
-                        }
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(22.dp),
                         ) {

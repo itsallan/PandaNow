@@ -50,13 +50,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
-import com.google.android.gms.ads.rewarded.RewardedAd
 import io.dala.pandanow.presentation.VideoPlayerViewModel
 import io.dala.pandanow.presentation.components.SelectionCard
 import io.dala.pandanow.presentation.components.VideoControllerUI
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
 import io.dala.pandanow.utils.SystemSettings
-import io.dala.pandanow.utils.ads.loadRewardedAd
 import io.dala.pandanow.utils.getQualityDescription
 import kotlinx.coroutines.delay
 
@@ -99,20 +97,7 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
 
 
     val currentSubtitleText by remember { mutableStateOf(details.subtitle) }
-    val scope = rememberCoroutineScope()
 
-    val (rewardedAd, setRewardedAd) = remember {
-        mutableStateOf<RewardedAd?>(
-            null
-        )
-    }
-    LaunchedEffect(Unit) {
-        loadRewardedAd(
-            context,
-            "ca-app-pub-6822790457668840/7331886021",
-            setRewardedAd
-        )
-    }
     // Set default orientation to landscape
     LaunchedEffect(Unit) {
         context.findActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -126,13 +111,10 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
     }
 
     LaunchedEffect(details.videoUrl) {
-        // Set the media URL to start playback
         viewModel.setMediaItem(details.videoUrl, details.subtitleUrl)
-        // Save to history when playback starts
         viewModel.saveToHistory(details.title, details.subtitle, details.subtitleUrl)
     }
 
-// Also add this effect to update progress periodically
     LaunchedEffect(player, isPlaying) {
         while (isPlaying && player != null) {
             viewModel.saveCurrentPosition()
