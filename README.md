@@ -11,9 +11,9 @@
 
 <div align="center">
 <div>
-  <img src="art/screenshots/phoneScreenshots/1.jpg", width="30%">
-  <img src="art/screenshots/phoneScreenshots/2.jpg", width="30%">
-  <img src="art/screenshots/phoneScreenshots/3.jpg", width="30%">
+  <img src="art/screenshots/phoneScreenshots/1.png", width="30%">
+  <img src="art/screenshots/phoneScreenshots/2.png", width="30%">
+  <img src="art/screenshots/phoneScreenshots/3.png", width="30%">
 </div>
 </div>
 
