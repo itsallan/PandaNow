@@ -128,10 +128,8 @@ fun HomeScreen(navController: NavController) {
                 videoUrlError = videoUrl.isEmpty()
 
                 if (!videoUrlError) {
-                    val finalTitle = if (title.isEmpty()) {
+                    val finalTitle = title.ifEmpty {
                         "Untitled Video"
-                    } else {
-                        title
                     }
 
                     val historyItem = VideoHistoryItem(

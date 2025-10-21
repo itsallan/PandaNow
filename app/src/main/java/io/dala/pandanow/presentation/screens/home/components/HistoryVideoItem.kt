@@ -60,33 +60,14 @@ fun HistoryVideoItem(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Thumbnail section with progress indicator
             Box(
                 modifier = Modifier
                     .size(width = 120.dp, height = 70.dp)
                     .clip(RoundedCornerShape(8.dp))
             ) {
-                SubcomposeAsyncImage(
-                    model = "",
-                    contentDescription = video.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    error = {
-                        // Fallback to video icon
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.VideoLibrary,
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
+                VideoThumbnail(
+                    video = video,
+                    modifier = Modifier.fillMaxSize()
                 )
 
                 Box(

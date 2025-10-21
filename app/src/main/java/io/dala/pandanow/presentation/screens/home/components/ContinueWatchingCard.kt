@@ -29,12 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import io.dala.pandanow.data.VideoHistoryItem
 import io.dala.pandanow.presentation.components.formatDuration
+import io.dala.pandanow.utils.generateVideoThumbnail
 import io.dala.pandanow.utils.getTimeAgo
 
 @Composable
@@ -69,33 +71,14 @@ fun ContinueWatchingCard(
         )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Thumbnail with dynamic height based on aspect ratio
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp)
             ) {
-                SubcomposeAsyncImage(
-                    model = "",
-                    contentDescription = video.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    error = {
-                        // Fallback to video icon
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.VideoLibrary,
-                                contentDescription = null,
-                                modifier = Modifier.size(80.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            )
-                        }
-                    }
+                VideoThumbnail(
+                    video = video,
+                    modifier = Modifier.fillMaxSize()
                 )
 
                 // Gradient overlay for better text visibility

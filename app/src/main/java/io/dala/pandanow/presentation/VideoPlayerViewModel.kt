@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @UnstableApi
 class VideoPlayerViewModel(application: Application) : AndroidViewModel(application) {
@@ -134,7 +135,7 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
 
     fun setMediaItem(uri: String, subtitleUri: String? = null, adTagUri: String? = null) {
         _currentUrl.value = uri
-        val mediaSource = buildMediaSource(Uri.parse(uri), adTagUri, subtitleUri)
+        val mediaSource = buildMediaSource(uri.toUri(), adTagUri, subtitleUri)
 
         player.value?.setMediaSource(mediaSource)
         player.value?.prepare()
@@ -164,7 +165,6 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
     private fun buildMediaSource(uri: Uri, adTagUri: String?, subtitleUri: String?): MediaSource {
         val mediaItem = MediaItem.Builder()
             .setUri(uri)
-            .apply { adTagUri?.let { setAdTagUri(it) } }
             .apply {
                 subtitleUri?.let { uri ->
                     val subtitleConfiguration = MediaItem.SubtitleConfiguration.Builder(Uri.parse(uri))

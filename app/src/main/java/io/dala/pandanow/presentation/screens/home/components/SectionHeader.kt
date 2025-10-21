@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,12 +44,12 @@ fun SectionHeader(
                 fontWeight = FontWeight.Bold
             )
 
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .width(40.dp)
                     .padding(top = 4.dp)
                     .height(2.dp),
-                color = MaterialTheme.colorScheme.primary
+                thickness = DividerDefaults.Thickness, color = MaterialTheme.colorScheme.primary
             )
         }
 
