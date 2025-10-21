@@ -42,6 +42,21 @@ android {
     }
 }
 
+android.applicationVariants.configureEach {
+    val variant = this
+    if (variant.buildType.name == "release") {
+        variant.outputs.configureEach {
+            if (outputFile.name.endsWith(".apk")) {
+                val appName = "PandaNow"
+                val versionName = variant.versionName
+                val newName = "$appName-v$versionName.apk"
+                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                    newName.replace("-unsigned", "")
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
