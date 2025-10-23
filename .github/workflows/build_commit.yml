@@ -27,7 +27,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run Custom Release Build Task
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleDebug
 
       - name: Upload APK to GitHub Release
         uses: softprops/action-gh-release@v2
