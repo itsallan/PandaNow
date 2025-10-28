@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.AspectRatioFrameLayout
 import io.dala.pandanow.presentation.components.formatDuration
-import io.dala.pandanow.utils.getSpeedDescription
+import io.dala.pandanow.presentation.utils.getSpeedDescription
 
 @OptIn(UnstableApi::class)
 @Composable

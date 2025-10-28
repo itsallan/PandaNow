@@ -50,8 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import io.dala.pandanow.presentation.theme.ThemeStateManager
-import io.dala.pandanow.utils.SettingsManager
-import io.dala.pandanow.utils.VideoHistoryManager
+import io.dala.pandanow.presentation.utils.SettingsManager
+import io.dala.pandanow.presentation.utils.VideoHistoryManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

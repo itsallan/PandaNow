@@ -1,4 +1,4 @@
-package io.dala.pandanow.utils
+package io.dala.pandanow.presentation.utils
 
 // Helper function to format time ago
 fun getTimeAgo(timestamp: Long): String {

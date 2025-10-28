@@ -1,9 +1,10 @@
-package io.dala.pandanow.utils
-
-import io.dala.pandanow.data.VideoHistoryItem
+package io.dala.pandanow.presentation.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
+import androidx.annotation.RequiresApi
+import io.dala.pandanow.domain.models.VideoHistoryItem
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -15,6 +16,7 @@ class VideoHistoryManager(context: Context) {
 
     private val json = Json { ignoreUnknownKeys = true }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     fun saveVideoToHistory(video: VideoHistoryItem) {
         val history = getVideoHistory().toMutableList()
         history.removeIf { it.videoUrl == video.videoUrl }

@@ -16,8 +16,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import io.dala.pandanow.data.VideoHistoryItem
-import io.dala.pandanow.utils.generateVideoThumbnail
+import io.dala.pandanow.domain.models.VideoHistoryItem
+import io.dala.pandanow.presentation.utils.generateVideoThumbnail
 
 @Composable
 fun VideoThumbnail(

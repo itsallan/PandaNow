@@ -3,7 +3,6 @@ package io.dala.pandanow.presentation
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,8 +17,8 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.SimpleCache
+// ALIASING FIX: Alias the Media3 class to avoid conflict with the custom interface
+import androidx.media3.datasource.cache.CacheDataSource as Media3CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.dash.DashMediaSource
 import androidx.media3.exoplayer.hls.HlsMediaSource
@@ -28,9 +27,12 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import io.dala.pandanow.data.VideoHistoryItem
-import io.dala.pandanow.utils.CacheManager
-import io.dala.pandanow.utils.VideoHistoryManager
+// IMPORT Custom Interface
+import io.dala.pandanow.data.source.VideoCacheDataSource
+import io.dala.pandanow.domain.models.VideoHistoryItem
+import io.dala.pandanow.domain.usecase.GetSavedPositionUseCase
+import io.dala.pandanow.domain.usecase.SaveCurrentPositionUseCase
+import io.dala.pandanow.domain.usecase.SaveToHistoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,57 +40,47 @@ import kotlinx.coroutines.launch
 import androidx.core.net.toUri
 
 @UnstableApi
-class VideoPlayerViewModel(application: Application) : AndroidViewModel(application) {
+class VideoPlayerViewModel(
+    application: Application,
+    videoCacheDataSource: VideoCacheDataSource,
+    private val getSavedPositionUseCase: GetSavedPositionUseCase,
+    private val saveCurrentPositionUseCase: SaveCurrentPositionUseCase,
+    private val saveToHistoryUseCase: SaveToHistoryUseCase
+) : AndroidViewModel(application) {
+
     @SuppressLint("StaticFieldLeak")
     private val context: Context = application.applicationContext
-    private val cache: SimpleCache = CacheManager.getCache(context)
-    private val sharedPreferences: SharedPreferences = context.getSharedPreferences("VideoPositions", Context.MODE_PRIVATE)
-
-    private val cacheDataSourceFactory = CacheDataSource.Factory()
-        .setCache(cache)
+    private val cacheDataSourceFactory = Media3CacheDataSource.Factory()
+        .setCache(videoCacheDataSource.getCache())
         .setUpstreamDataSourceFactory(DefaultDataSource.Factory(context))
-        .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+        .setFlags(Media3CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
     private val mediaSourceFactory = DefaultMediaSourceFactory(cacheDataSourceFactory)
-
     private lateinit var trackSelector: DefaultTrackSelector
-
     private val _player = MutableStateFlow<ExoPlayer?>(null)
     val player: StateFlow<ExoPlayer?> = _player.asStateFlow()
-
     private val _currentUrl = MutableStateFlow<String?>(null)
     private val currentUrl: StateFlow<String?> = _currentUrl.asStateFlow()
-
     private val _isBuffering = MutableStateFlow(false)
     val isBuffering: StateFlow<Boolean> = _isBuffering.asStateFlow()
-
     private val _areControlsVisible = MutableStateFlow(true)
     val areControlsVisible = _areControlsVisible.asStateFlow()
-
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
-
     private val _isInPipMode = MutableStateFlow(false)
     val isInPipMode: StateFlow<Boolean> = _isInPipMode.asStateFlow()
-
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
-
     private val _playbackSpeed = MutableStateFlow(1f)
     val playbackSpeed: StateFlow<Float> = _playbackSpeed.asStateFlow()
-
     private val _availableVideoQualities = MutableStateFlow<List<Pair<String, TrackSelectionParameters>>>(emptyList())
     val availableVideoQualities: StateFlow<List<Pair<String, TrackSelectionParameters>>> = _availableVideoQualities.asStateFlow()
-
     private val _availableSubtitles = MutableStateFlow<List<Pair<String, TrackSelectionParameters>>>(emptyList())
     val availableSubtitles: StateFlow<List<Pair<String, TrackSelectionParameters>>> = _availableSubtitles.asStateFlow()
-
     private val _currentVideoQuality = MutableStateFlow<Pair<String, TrackSelectionParameters>?>(null)
     val currentVideoQuality: StateFlow<Pair<String, TrackSelectionParameters>?> = _currentVideoQuality.asStateFlow()
-
     private val _currentSubtitle = MutableStateFlow<Pair<String, TrackSelectionParameters>?>(null)
     val currentSubtitle: StateFlow<Pair<String, TrackSelectionParameters>?> = _currentSubtitle.asStateFlow()
-
     init {
         initializePlayer()
     }
@@ -124,6 +116,16 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
                 override fun onTracksChanged(tracks: Tracks) {
                     updateAvailableTracks(tracks)
                 }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    val currentUrl = _currentUrl.value
+                    if (currentUrl != null && currentUrl.endsWith(".mp4", ignoreCase = true) &&
+                        error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED) {
+                        _errorMessage.value = "Authentication failed. Please check your credentials."
+                    } else {
+                        _errorMessage.value = "An error occurred: ${error.message}"
+                    }
+                }
             })
 
             newPlayer.playWhenReady = true
@@ -140,34 +142,26 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
         player.value?.setMediaSource(mediaSource)
         player.value?.prepare()
 
-        val savedPosition = getSavedPosition(uri)
-        if (savedPosition > 0) {
-            player.value?.seekTo(savedPosition)
+        viewModelScope.launch {
+            val savedPosition = getSavedPositionUseCase(uri)
+            if (savedPosition > 0) {
+                player.value?.seekTo(savedPosition)
+            }
+            player.value?.playWhenReady = true
         }
-        player.value?.playWhenReady = true
 
         _errorMessage.value = null
 
         updateAvailableTracks(player.value?.currentTracks)
-
-        player.value?.addListener(object : Player.Listener {
-            override fun onPlayerError(error: PlaybackException) {
-                if (uri.endsWith(".mp4", ignoreCase = true) &&
-                    error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED) {
-                    _errorMessage.value = "Authentication failed. Please check your credentials."
-                } else {
-                    _errorMessage.value = "An error occurred: ${error.message}"
-                }
-            }
-        })
     }
 
     private fun buildMediaSource(uri: Uri, adTagUri: String?, subtitleUri: String?): MediaSource {
         val mediaItem = MediaItem.Builder()
             .setUri(uri)
+            .apply { adTagUri?.let { setAdTagUri(it) } }
             .apply {
                 subtitleUri?.let { uri ->
-                    val subtitleConfiguration = MediaItem.SubtitleConfiguration.Builder(Uri.parse(uri))
+                    val subtitleConfiguration = MediaItem.SubtitleConfiguration.Builder(uri.toUri())
                         .setMimeType(MimeTypes.TEXT_VTT)
                         .setLanguage("en")
                         .build()
@@ -273,7 +267,9 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
                         timestamp = System.currentTimeMillis()
                     )
 
-                    VideoHistoryManager.getInstance(context).saveVideoToHistory(historyItem)
+                    viewModelScope.launch {
+                        saveToHistoryUseCase(historyItem)
+                    }
                 }
             }
         }
@@ -285,27 +281,14 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
                 if (exoPlayer.playbackState == Player.STATE_READY || exoPlayer.playbackState == Player.STATE_ENDED) {
                     val currentPosition = exoPlayer.currentPosition
                     val duration = exoPlayer.duration
-                    sharedPreferences.edit().putLong(url, currentPosition).apply()
-                    VideoHistoryManager.getInstance(context).updateVideoProgress(url, currentPosition, duration)
+
+                    viewModelScope.launch {
+                        saveCurrentPositionUseCase(url, currentPosition, duration)
+                    }
                 }
             }
         }
     }
-
-    private fun getSavedPosition(uri: String): Long {
-        return sharedPreferences.getLong(uri, 0L)
-    }
-
-//    fun saveCurrentPosition() {
-//        player.value?.let { exoPlayer ->
-//            currentUrl.value?.let { url ->
-//                if (exoPlayer.playbackState == Player.STATE_READY || exoPlayer.playbackState == Player.STATE_ENDED) {
-//                    val currentPosition = exoPlayer.currentPosition
-//                    sharedPreferences.edit().putLong(url, currentPosition).apply()
-//                }
-//            }
-//        }
-//    }
 
     fun toggleControlsVisibility() {
         _areControlsVisible.value = !_areControlsVisible.value
@@ -362,17 +345,5 @@ class VideoPlayerViewModel(application: Application) : AndroidViewModel(applicat
         super.onCleared()
         saveCurrentPosition()
         player.value?.release()
-    }
-
-    companion object {
-        @SuppressLint("StaticFieldLeak")
-        @Volatile
-        private var instance: VideoPlayerViewModel? = null
-
-        fun getInstance(application: Application): VideoPlayerViewModel {
-            return instance ?: synchronized(this) {
-                instance ?: VideoPlayerViewModel(application).also { instance = it }
-            }
-        }
     }
 }

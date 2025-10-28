@@ -1,4 +1,4 @@
-package io.dala.pandanow.utils
+package io.dala.pandanow.presentation.utils
 
 fun getSpeedDescription(speed: Float): String {
     return when (speed) {
