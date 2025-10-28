@@ -15,6 +15,11 @@
   <img src="art/phoneScreenshots/2.png", width="30%">
   <img src="art/phoneScreenshots/3.png", width="30%">
 </div>
+<div>
+  <img src="art/phoneScreenshots/4.png", width="30%">
+  <img src="art/phoneScreenshots/5.png", width="30%">
+  <img src="art/phoneScreenshots/6.png", width="30%">
+</div>
 </div>
 
 ## 🌟 Features
