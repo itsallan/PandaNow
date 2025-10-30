@@ -59,7 +59,7 @@ import compose.icons.tablericons.PlayerSkipBack
 import compose.icons.tablericons.Speedboat
 import compose.icons.tablericons.ZodiacAquarius
 import io.dala.pandanow.presentation.components.formatDuration
-import io.dala.pandanow.utils.getSpeedDescription
+import io.dala.pandanow.presentation.utils.getSpeedDescription
 import kotlinx.coroutines.delay
 
 @OptIn(UnstableApi::class)

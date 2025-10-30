@@ -25,19 +25,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Settings
-import io.dala.pandanow.data.VideoHistoryItem
+import io.dala.pandanow.domain.models.VideoHistoryItem
+import io.dala.pandanow.presentation.HomeViewModel
 import io.dala.pandanow.presentation.navigation.SettingsRoute
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
 import io.dala.pandanow.presentation.screens.home.components.AddVideoScreen
@@ -45,8 +46,8 @@ import io.dala.pandanow.presentation.screens.home.components.ContinueWatchingCar
 import io.dala.pandanow.presentation.screens.home.components.EmptyHistoryState
 import io.dala.pandanow.presentation.screens.home.components.HistoryVideoItem
 import io.dala.pandanow.presentation.screens.home.components.SectionTitle
-import io.dala.pandanow.utils.VideoHistoryManager
-import io.dala.pandanow.utils.formatFilenameToTitle
+import io.dala.pandanow.presentation.utils.formatFilenameToTitle
+import org.koin.androidx.compose.koinViewModel
 import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -54,7 +55,8 @@ import java.nio.charset.StandardCharsets
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
-    val context = LocalContext.current
+    val viewModel: HomeViewModel = koinViewModel()
+    val videoHistory by viewModel.videoHistory.collectAsState()
     var showAddVideoScreen by remember { mutableStateOf(false) }
     var videoUrl by remember { mutableStateOf("") }
     var title by remember { mutableStateOf("") }
@@ -65,16 +67,10 @@ fun HomeScreen(navController: NavController) {
     var showAdvancedOptions by remember { mutableStateOf(false) }
     var autoExtractMetadata by remember { mutableStateOf(true) }
 
-    // Video history from SharedPreferences
-    val historyManager = remember { VideoHistoryManager.getInstance(context) }
-    var videoHistory by remember { mutableStateOf(historyManager.getVideoHistory()) }
-
-    // Refreshes the history when the screen is shown
     LaunchedEffect(Unit) {
-        videoHistory = historyManager.getVideoHistory()
+        viewModel.loadHistory()
     }
 
-    // Auto extract metadata when URL changes
     LaunchedEffect(videoUrl) {
         if (autoExtractMetadata && videoUrl.isNotEmpty()) {
             try {
@@ -137,11 +133,13 @@ fun HomeScreen(navController: NavController) {
                         title = finalTitle,
                         subtitle = subtitle.takeIf { it.isNotEmpty() },
                         subtitleUrl = subtitleUrl.takeIf { it.isNotEmpty() },
+                        lastPosition = 0L,
+                        duration = 0L,
                         timestamp = System.currentTimeMillis()
                     )
-                    historyManager.saveVideoToHistory(historyItem)
 
-                    videoHistory = historyManager.getVideoHistory()
+                    viewModel.saveNewVideoToHistory(historyItem)
+
                     showAddVideoScreen = false
 
                     navController.navigate(
@@ -157,7 +155,6 @@ fun HomeScreen(navController: NavController) {
         )
     } else {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
             topBar = {
                 CenterAlignedTopAppBar(
                     title = {
@@ -246,7 +243,6 @@ fun HomeScreen(navController: NavController) {
                             }
                         }
 
-                        // History section
                         item {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -256,10 +252,7 @@ fun HomeScreen(navController: NavController) {
                                 SectionTitle(title = "Watch History")
 
                                 IconButton(
-                                    onClick = {
-                                        historyManager.clearHistory()
-                                        videoHistory = emptyList()
-                                    }
+                                    onClick = { viewModel.clearHistory() }
                                 ) {
                                     Icon(
                                         imageVector = Icons.Outlined.Delete,

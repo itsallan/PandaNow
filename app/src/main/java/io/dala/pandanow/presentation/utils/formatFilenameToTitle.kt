@@ -1,4 +1,4 @@
-package io.dala.pandanow.utils
+package io.dala.pandanow.presentation.utils
 
 /**
  * Converts a filename to a readable title by:

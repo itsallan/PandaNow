@@ -10,7 +10,6 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
-import android.util.Log
 import android.util.Rational
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
@@ -35,7 +34,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,9 +52,13 @@ import io.dala.pandanow.presentation.VideoPlayerViewModel
 import io.dala.pandanow.presentation.components.SelectionCard
 import io.dala.pandanow.presentation.components.VideoControllerUI
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
-import io.dala.pandanow.utils.SystemSettings
-import io.dala.pandanow.utils.getQualityDescription
+import io.dala.pandanow.presentation.utils.SystemSettings
+import io.dala.pandanow.presentation.utils.getQualityDescription
 import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.java.KoinJavaComponent.inject
 
 fun Context.findActivity(): Activity? {
     var context = this
@@ -72,7 +74,7 @@ fun Context.findActivity(): Activity? {
 @OptIn(UnstableApi::class)
 @Composable
 fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) {
-    val viewModel: VideoPlayerViewModel = viewModel()
+    val viewModel: VideoPlayerViewModel = koinViewModel()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     SystemSettings.hideSystemUI(context.findActivity())
@@ -98,7 +100,6 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
 
     val currentSubtitleText by remember { mutableStateOf(details.subtitle) }
 
-    // Set default orientation to landscape
     LaunchedEffect(Unit) {
         context.findActivity()?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
     }
@@ -118,10 +119,9 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
     LaunchedEffect(player, isPlaying) {
         while (isPlaying && player != null) {
             viewModel.saveCurrentPosition()
-            delay(30000) // Update every 30 seconds
+            delay(30000)
         }
     }
-    // Handle lifecycle events
     DisposableEffect(lifecycleOwner) {
         viewModel.saveCurrentPosition()
         val observer = LifecycleEventObserver { _, event ->
@@ -148,17 +148,14 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
         }
     }
 
-    // PiP controls
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        DisposableEffect(isInPipMode, isPlaying) {
+    DisposableEffect(isInPipMode, isPlaying) {
 
-            val params = PictureInPictureParams.Builder()
-                .setAspectRatio(Rational(16, 9))
-                .build()
+        val params = PictureInPictureParams.Builder()
+            .setAspectRatio(Rational(16, 9))
+            .build()
 
-            context.findActivity()?.setPictureInPictureParams(params)
-            onDispose { }
-        }
+        context.findActivity()?.setPictureInPictureParams(params)
+        onDispose { }
     }
 
     LaunchedEffect(player) {
@@ -173,7 +170,7 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
 
     LaunchedEffect(player, isPlaying) {
         while (isPlaying && player != null) {
-            delay(30000) // Every 30 seconds
+            delay(30000)
         }
     }
 
@@ -271,7 +268,6 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
                 }
             )
         }
-        // Speed control card
         AnimatedVisibility(
             visible = showSpeedOptions,
             enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
@@ -370,16 +366,19 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
     }
 }
 
-class PipReceiver : BroadcastReceiver() {
+class PipReceiver : BroadcastReceiver(), KoinComponent {
+
     companion object {
         const val ACTION_PLAY_PAUSE = "ACTION_PLAY_PAUSE"
     }
 
     @OptIn(UnstableApi::class)
+    private val viewModel: VideoPlayerViewModel by inject()
+
+    @OptIn(UnstableApi::class)
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             ACTION_PLAY_PAUSE -> {
-                val viewModel = VideoPlayerViewModel.getInstance(context.applicationContext as Application)
                 viewModel.togglePlayPause()
             }
         }

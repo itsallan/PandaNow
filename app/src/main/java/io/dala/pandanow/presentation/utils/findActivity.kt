@@ -1,4 +1,4 @@
-package io.dala.pandanow.utils
+package io.dala.pandanow.presentation.utils
 
 import android.app.Activity
 import android.content.Context
