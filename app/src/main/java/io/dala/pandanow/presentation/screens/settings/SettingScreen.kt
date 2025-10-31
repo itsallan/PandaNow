@@ -24,7 +24,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +51,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import io.dala.pandanow.presentation.screens.settings.components.SettingsItem
+import io.dala.pandanow.presentation.screens.settings.components.SettingsSectionHeader
+import io.dala.pandanow.presentation.screens.settings.components.SettingsToggle
 import io.dala.pandanow.presentation.theme.ThemeStateManager
 import io.dala.pandanow.presentation.utils.SettingsManager
 import io.dala.pandanow.presentation.utils.VideoHistoryManager
@@ -122,7 +127,6 @@ fun SettingsScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Data Management
                 SettingsSectionHeader(title = "Data Management", icon = Icons.Default.Delete)
 
                 SettingsItem(
@@ -140,7 +144,7 @@ fun SettingsScreen(navController: NavController) {
 
                 SettingsItem(
                     title = "About PandaNow",
-                    description = "Version 1.0.0",
+                    description = "Version 0.0.1beta01",
                     value = "",
                     onClick = { showAboutDialog = true },
                     showDivider = false
@@ -230,7 +234,7 @@ fun SettingsScreen(navController: NavController) {
                     text = {
                         Column {
                             Text("PandaNow Video Player")
-                            Text("Version 1.0.0")
+                            Text("Version 0.0.1beta01")
                             Spacer(modifier = Modifier.height(8.dp))
                             Text("A modern video player for all your media needs.")
                             Spacer(modifier = Modifier.height(8.dp))
@@ -245,140 +249,5 @@ fun SettingsScreen(navController: NavController) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun SettingsToggle(
-    title: String,
-    description: String,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(0.dp),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Switch(
-                checked = isChecked,
-                onCheckedChange = onCheckedChange
-            )
-        }
-
-        Divider(
-            modifier = Modifier.padding(start = 16.dp),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-        )
-    }
-}
-
-@Composable
-fun SettingsItem(
-    title: String,
-    description: String,
-    value: String,
-    onClick: () -> Unit,
-    showDivider: Boolean = true
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(0.dp))
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(0.dp),
-        elevation = CardDefaults.cardElevation(0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            if (value.isNotEmpty()) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-
-        if (showDivider) {
-            Divider(
-                modifier = Modifier.padding(start = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-            )
-        }
-    }
-}
-
-@Composable
-fun SettingsSectionHeader(
-    title: String,
-    icon: ImageVector
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
     }
 }

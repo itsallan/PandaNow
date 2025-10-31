@@ -2,7 +2,6 @@ package io.dala.pandanow.presentation.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.VideoFile
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -36,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -52,11 +49,10 @@ import io.dala.pandanow.presentation.HomeViewModel
 import io.dala.pandanow.presentation.navigation.HistoryRoute
 import io.dala.pandanow.presentation.navigation.SettingsRoute
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
+import io.dala.pandanow.presentation.screens.history.components.EmptyHistoryState
 import io.dala.pandanow.presentation.screens.home.components.AddVideoScreen
 import io.dala.pandanow.presentation.screens.home.components.ContinueWatchingCard
 import io.dala.pandanow.presentation.screens.home.components.CreatePlaylistScreen
-import io.dala.pandanow.presentation.screens.history.components.EmptyHistoryState
-import io.dala.pandanow.presentation.screens.history.components.HistoryVideoItem
 import io.dala.pandanow.presentation.screens.home.components.PlaylistCard
 import io.dala.pandanow.presentation.screens.home.components.SectionTitle
 import io.dala.pandanow.presentation.utils.formatFilenameToTitle
@@ -72,8 +68,7 @@ import java.nio.charset.StandardCharsets
 fun HomeScreen(navController: NavController) {
     val viewModel: HomeViewModel = koinViewModel()
     val videoHistory by viewModel.videoHistory.collectAsState()
-    val playlists by viewModel.playlists.collectAsState() // New playlist state
-
+    val playlists by viewModel.playlists.collectAsState()
 
     var showAddVideoScreen by rememberSaveable { mutableStateOf(false) }
     var videoUrl by rememberSaveable { mutableStateOf("") }
@@ -275,7 +270,7 @@ fun HomeScreen(navController: NavController) {
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                if (videoHistory.isEmpty() && playlists.isEmpty()) {
+                if (continueWatchingVideo == null && playlists.isEmpty()) {
                     EmptyHistoryState(
                         onAddVideo = {
                             resetAddVideoState()
@@ -286,7 +281,7 @@ fun HomeScreen(navController: NavController) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
+                            .padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         continueWatchingVideo?.let { video ->
@@ -318,15 +313,12 @@ fun HomeScreen(navController: NavController) {
                                     onClick = {
                                         val firstVideo = playlist.videos.firstOrNull()
                                         if (firstVideo != null) {
-                                            navController.navigate(
-                                                VideoPlayerRoute(
-                                                    videoUrl = firstVideo.videoUrl,
-                                                    title = playlist.name,
-                                                    subtitle = null,
-                                                    subtitleUrl = null,
-                                                    playlistId = playlist.id,
-                                                    initialVideoIndex = 0
-                                                )
+                                            navigateToVideoPlayer(
+                                                firstVideo.videoUrl,
+                                                playlist.name,
+                                                null,
+                                                null,
+                                                playlist.id
                                             )
                                         }
                                     }
@@ -335,6 +327,10 @@ fun HomeScreen(navController: NavController) {
                             item {
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(80.dp))
                         }
                     }
                 }

@@ -34,6 +34,7 @@ import io.dala.pandanow.presentation.screens.home.components.ContinueWatchingCar
 import io.dala.pandanow.presentation.screens.home.components.SectionTitle
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.graphics.Color
 import io.dala.pandanow.presentation.screens.history.components.EmptyHistoryState
 import io.dala.pandanow.presentation.screens.history.components.HistoryVideoItem
 
@@ -79,8 +80,8 @@ fun HistoryScreen(navController: NavController) {
                         }
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
                 )
             )
         }
@@ -88,7 +89,6 @@ fun HistoryScreen(navController: NavController) {
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             if (videoHistory.isEmpty()) {
                 EmptyHistoryState(
-                   // modifier = Modifier.align(Alignment.Center),
                     onAddVideo = { navController.popBackStack() }
                 )
             } else {
