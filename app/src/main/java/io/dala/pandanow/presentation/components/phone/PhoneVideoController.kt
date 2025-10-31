@@ -17,12 +17,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.NavigateBefore
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.FitScreen
 import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.NavigateBefore
+import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
 import androidx.compose.material.icons.filled.PhotoSizeSelectSmall
@@ -69,6 +76,10 @@ fun PhoneVideoControllerUI(
     playbackSpeed: Float,
     currentQuality: String,
     currentSubtitle: String,
+    isPlayingPlaylist: Boolean,
+    onNextVideo: () -> Unit,
+    onPreviousVideo: () -> Unit,
+    onTogglePlaylist: () -> Unit,
     onPlayPause: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onSeekForward: () -> Unit,
@@ -128,7 +139,7 @@ fun PhoneVideoControllerUI(
                                         .size(40.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Default.ArrowBack,
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                         contentDescription = "Back",
                                         tint = Color.White
                                     )
@@ -172,6 +183,13 @@ fun PhoneVideoControllerUI(
                                     label = currentQuality,
                                     onClick = onQualityChange
                                 )
+                                if (isPlayingPlaylist) {
+                                    ControlButton(
+                                        icon = Icons.AutoMirrored.Filled.List,
+                                        label = "Playlist",
+                                        onClick = onTogglePlaylist
+                                    )
+                                }
                             }
                         }
                     } else {
@@ -218,6 +236,13 @@ fun PhoneVideoControllerUI(
                             modifier = Modifier.align(Alignment.CenterEnd),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            if (isPlayingPlaylist) {
+                                ControlButton(
+                                    icon = Icons.Default.List,
+                                    label = "Playlist",
+                                    onClick = onTogglePlaylist
+                                )
+                            }
                             ControlButton(
                                 icon = Icons.Default.ClosedCaption,
                                 label = currentSubtitle,
@@ -249,6 +274,17 @@ fun PhoneVideoControllerUI(
                             tint = Color.White
                         )
                     }
+
+                    if (isPlayingPlaylist) {
+                        RoundIconButton(onClick = onPreviousVideo) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.NavigateBefore,
+                                contentDescription = "Previous Video",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
                     if (isBuffering) {
                         CircularProgressIndicator(color = Color.White)
                     } else {
@@ -264,6 +300,17 @@ fun PhoneVideoControllerUI(
                             )
                         }
                     }
+
+                    if (isPlayingPlaylist) {
+                        RoundIconButton(onClick = onNextVideo) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.NavigateNext,
+                                contentDescription = "Next Video",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
                     RoundIconButton(onClick = onSeekForward) {
                         Icon(
                             Icons.Default.Forward10,

@@ -11,11 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,22 +34,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.xr.compose.material3.ExperimentalMaterial3XrApi
+import androidx.xr.compose.material3.HorizontalFloatingToolbar
 import compose.icons.TablerIcons
+import compose.icons.tablericons.History
 import compose.icons.tablericons.Settings
 import io.dala.pandanow.domain.models.VideoHistoryItem
 import io.dala.pandanow.presentation.HomeViewModel
+import io.dala.pandanow.presentation.navigation.HistoryRoute
 import io.dala.pandanow.presentation.navigation.SettingsRoute
 import io.dala.pandanow.presentation.navigation.VideoPlayerRoute
 import io.dala.pandanow.presentation.screens.home.components.AddVideoScreen
 import io.dala.pandanow.presentation.screens.home.components.ContinueWatchingCard
-import io.dala.pandanow.presentation.screens.home.components.EmptyHistoryState
-import io.dala.pandanow.presentation.screens.home.components.HistoryVideoItem
+import io.dala.pandanow.presentation.screens.home.components.CreatePlaylistScreen
+import io.dala.pandanow.presentation.screens.history.components.EmptyHistoryState
+import io.dala.pandanow.presentation.screens.history.components.HistoryVideoItem
+import io.dala.pandanow.presentation.screens.home.components.PlaylistCard
 import io.dala.pandanow.presentation.screens.home.components.SectionTitle
 import io.dala.pandanow.presentation.utils.formatFilenameToTitle
 import org.koin.androidx.compose.koinViewModel
@@ -52,23 +65,32 @@ import java.net.URI
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalMaterial3XrApi::class
+)
 @Composable
 fun HomeScreen(navController: NavController) {
     val viewModel: HomeViewModel = koinViewModel()
     val videoHistory by viewModel.videoHistory.collectAsState()
-    var showAddVideoScreen by remember { mutableStateOf(false) }
-    var videoUrl by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
-    var subtitle by remember { mutableStateOf("") }
-    var subtitleUrl by remember { mutableStateOf("") }
+    val playlists by viewModel.playlists.collectAsState() // New playlist state
 
-    var videoUrlError by remember { mutableStateOf(false) }
-    var showAdvancedOptions by remember { mutableStateOf(false) }
-    var autoExtractMetadata by remember { mutableStateOf(true) }
+
+    var showAddVideoScreen by rememberSaveable { mutableStateOf(false) }
+    var videoUrl by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable { mutableStateOf("") }
+    var subtitle by rememberSaveable { mutableStateOf("") }
+    var subtitleUrl by rememberSaveable { mutableStateOf("") }
+    var videoUrlError by rememberSaveable { mutableStateOf(false) }
+    var showAdvancedOptions by rememberSaveable { mutableStateOf(false) }
+    var autoExtractMetadata by rememberSaveable { mutableStateOf(true) }
+
+    var showCreatePlaylistScreen by rememberSaveable { mutableStateOf(false) }
+
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadHistory()
+        viewModel.loadPlaylists()
     }
 
     LaunchedEffect(videoUrl) {
@@ -99,6 +121,27 @@ fun HomeScreen(navController: NavController) {
 
     val continueWatchingVideo = remember(videoHistory) {
         videoHistory.firstOrNull { it.lastPosition > 0 && it.lastPosition < it.duration }
+    }
+
+    val navigateToVideoPlayer = { finalVideoUrl: String, finalTitle: String, finalSubtitle: String?, finalSubtitleUrl: String?, playlistId: String? ->
+        navController.navigate(
+            VideoPlayerRoute(
+                videoUrl = finalVideoUrl,
+                title = finalTitle,
+                subtitle = finalSubtitle,
+                subtitleUrl = finalSubtitleUrl,
+                playlistId = playlistId
+            )
+        )
+    }
+
+    val resetAddVideoState = {
+        videoUrl = ""
+        title = ""
+        subtitle = ""
+        subtitleUrl = ""
+        videoUrlError = false
+        showAdvancedOptions = false
     }
 
     if (showAddVideoScreen) {
@@ -142,17 +185,18 @@ fun HomeScreen(navController: NavController) {
 
                     showAddVideoScreen = false
 
-                    navController.navigate(
-                        VideoPlayerRoute(
-                            videoUrl = videoUrl,
-                            title = finalTitle,
-                            subtitle = subtitle.takeIf { it.isNotEmpty() },
-                            subtitleUrl = subtitleUrl.takeIf { it.isNotEmpty() }
-                        )
+                    navigateToVideoPlayer(
+                        videoUrl,
+                        finalTitle,
+                        subtitle.takeIf { it.isNotEmpty() },
+                        subtitleUrl.takeIf { it.isNotEmpty() },
+                        null
                     )
                 }
             }
         )
+    } else if (showCreatePlaylistScreen) {
+        CreatePlaylistScreen(onBack = { showCreatePlaylistScreen = false })
     } else {
         Scaffold(
             topBar = {
@@ -165,11 +209,17 @@ fun HomeScreen(navController: NavController) {
                             )
                         )
                     },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.primary
+                        scrolledContainerColor = Color.Unspecified,
+                        navigationIconContentColor = Color.Unspecified,
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                        actionIconContentColor = Color.Unspecified
                     ),
                     actions = {
+                        IconButton(onClick = { navController.navigate(HistoryRoute) }) {
+                            Icon(TablerIcons.History, contentDescription = "Watch History")
+                        }
                         IconButton(onClick = { navController.navigate(SettingsRoute) }) {
                             Icon(TablerIcons.Settings, contentDescription = "Settings")
                         }
@@ -177,37 +227,58 @@ fun HomeScreen(navController: NavController) {
                 )
             },
             floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        videoUrl = ""
-                        title = ""
-                        subtitle = ""
-                        subtitleUrl = ""
-                        videoUrlError = false
-                        showAdvancedOptions = false
-                        showAddVideoScreen = true
+                HorizontalFloatingToolbar(
+                    expanded = expanded,
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = { expanded = !expanded },
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = if (expanded) "Close menu" else "Expand menu")
+                        }
                     },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Add Video") }
+                    colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
+                    content = {
+                        IconButton(
+                            onClick = {
+                                expanded = false
+                                resetAddVideoState()
+                                showCreatePlaylistScreen = true
+                            }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.QueueMusic,
+                                contentDescription = "Create Playlist"
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                expanded = false
+                                resetAddVideoState()
+                                showAddVideoScreen = true
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.VideoFile,
+                                contentDescription = "Add Video"
+                            )
+                        }
+                    },
                 )
-            }
+            },
+            floatingActionButtonPosition = FabPosition.End,
         ) { innerPadding ->
             Surface(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                if (videoHistory.isEmpty()) {
+                if (videoHistory.isEmpty() && playlists.isEmpty()) {
                     EmptyHistoryState(
                         onAddVideo = {
-                            videoUrl = ""
-                            title = ""
-                            subtitle = ""
-                            subtitleUrl = ""
-                            videoUrlError = false
-                            showAdvancedOptions = false
+                            resetAddVideoState()
                             showAddVideoScreen = true
                         }
                     )
@@ -228,14 +299,7 @@ fun HomeScreen(navController: NavController) {
                                     ContinueWatchingCard(
                                         video = video,
                                         onPlayClick = {
-                                            navController.navigate(
-                                                VideoPlayerRoute(
-                                                    videoUrl = video.videoUrl,
-                                                    title = video.title,
-                                                    subtitle = video.subtitle,
-                                                    subtitleUrl = video.subtitleUrl
-                                                )
-                                            )
+                                            navigateToVideoPlayer(video.videoUrl, video.title, video.subtitle, video.subtitleUrl, null)
                                         }
                                     )
                                 }
@@ -243,44 +307,34 @@ fun HomeScreen(navController: NavController) {
                             }
                         }
 
-                        item {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                SectionTitle(title = "Watch History")
-
-                                IconButton(
-                                    onClick = { viewModel.clearHistory() }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = "Clear History",
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
+                        if (playlists.isNotEmpty()) {
+                            item {
+                                SectionTitle(title = "Playlists")
                             }
-                        }
 
-                        items(videoHistory) { video ->
-                            HistoryVideoItem(
-                                video = video,
-                                onClick = {
-                                    navController.navigate(
-                                        VideoPlayerRoute(
-                                            videoUrl = video.videoUrl,
-                                            title = video.title,
-                                            subtitle = video.subtitle,
-                                            subtitleUrl = video.subtitleUrl
-                                        )
-                                    )
-                                }
-                            )
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.height(80.dp))
+                            items(playlists) { playlist ->
+                                PlaylistCard(
+                                    playlist = playlist,
+                                    onClick = {
+                                        val firstVideo = playlist.videos.firstOrNull()
+                                        if (firstVideo != null) {
+                                            navController.navigate(
+                                                VideoPlayerRoute(
+                                                    videoUrl = firstVideo.videoUrl,
+                                                    title = playlist.name,
+                                                    subtitle = null,
+                                                    subtitleUrl = null,
+                                                    playlistId = playlist.id,
+                                                    initialVideoIndex = 0
+                                                )
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
                         }
                     }
                 }
