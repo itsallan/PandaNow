@@ -88,10 +88,16 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
     val playbackSpeed by viewModel.playbackSpeed.collectAsStateWithLifecycle()
     val currentQuality by viewModel.currentVideoQuality.collectAsState()
     val currentSubtitle by viewModel.currentSubtitle.collectAsState()
+
+    val currentPlaylist by viewModel.currentPlaylist.collectAsStateWithLifecycle()
+    val currentPlaylistIndex by viewModel.currentPlaylistIndex.collectAsStateWithLifecycle()
+    val isPlayingPlaylist = viewModel.isPlayingPlaylist
+
     var showQualityOptions by remember { mutableStateOf(false) }
     var showSubtitleOptions by remember { mutableStateOf(false) }
     val currentQualityDescription = getQualityDescription(currentQuality?.first ?: "Auto")
 
+    var showPlaylistLinks by remember { mutableStateOf(false) }
     var showSpeedOptions by remember { mutableStateOf(false) }
     var resizeMode by remember { mutableIntStateOf(AspectRatioFrameLayout.RESIZE_MODE_FIT) }
     var currentPosition by remember { mutableLongStateOf(0L) }
@@ -108,12 +114,21 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
             showSpeedOptions = false
             showSubtitleOptions = false
             showQualityOptions = false
+            showPlaylistLinks = false
         }
     }
 
-    LaunchedEffect(details.videoUrl) {
-        viewModel.setMediaItem(details.videoUrl, details.subtitleUrl)
-        viewModel.saveToHistory(details.title, details.subtitle, details.subtitleUrl)
+    LaunchedEffect(details.videoUrl, details.playlistId, details.initialVideoIndex) {
+        viewModel.setMediaItem(
+            uri = details.videoUrl,
+            subtitleUri = details.subtitleUrl,
+            playlistId = details.playlistId,
+            initialVideoIndex = details.initialVideoIndex
+        )
+
+        if (details.playlistId == null) {
+            viewModel.saveToHistory(details.title, details.subtitle, details.subtitleUrl)
+        }
     }
 
     LaunchedEffect(player, isPlaying) {
@@ -183,7 +198,7 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
                     showSpeedOptions = false
                     showSubtitleOptions = false
                     showQualityOptions = false
-
+                    showPlaylistLinks = false
                 }
             }
     ) {
@@ -224,6 +239,15 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
                 onSeekForward = { player?.seekForward() },
                 currentQuality = currentQualityDescription,
                 currentSubtitle = currentSubtitle?.first ?: "None",
+                isPlayingPlaylist = isPlayingPlaylist,
+                onNextVideo = { viewModel.playNextVideo() },
+                onPreviousVideo = { viewModel.playPreviousVideo() },
+                onTogglePlaylist = {
+                    showPlaylistLinks = !showPlaylistLinks
+                    showSpeedOptions = false
+                    showQualityOptions = false
+                    showSubtitleOptions = false
+                },
                 onSeekBackward = { player?.seekBack() },
                 onToggleControls = { viewModel.toggleControlsVisibility() },
                 onBackPress = { navController.popBackStack() },
@@ -327,6 +351,26 @@ fun  VideoPlayerScreen(details: VideoPlayerRoute, navController: NavController) 
                     viewModel.setSubtitle(viewModel.availableSubtitles.value.first { it.first == subtitle })
                 },
                 onDismiss = { showSubtitleOptions = false }
+            )
+        }
+        // Playlist selection card
+        AnimatedVisibility(
+            visible = showPlaylistLinks && isPlayingPlaylist,
+            enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+            exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut(),
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            SelectionCard(
+                title = "Playlist Videos",
+                options = currentPlaylist.mapIndexed { index, item ->
+                    index to "${index + 1}. ${item.title}"
+                },
+                currentSelection = currentPlaylistIndex,
+                onOptionSelected = { index ->
+                    viewModel.playVideoAtIndex(index)
+                    showPlaylistLinks = false
+                },
+                onDismiss = { showPlaylistLinks = false }
             )
         }
 

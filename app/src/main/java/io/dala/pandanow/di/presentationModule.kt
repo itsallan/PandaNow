@@ -15,14 +15,17 @@ val presentationModule = module {
             videoCacheDataSource = get(),
             getSavedPositionUseCase = get(),
             saveCurrentPositionUseCase = get(),
-            saveToHistoryUseCase = get()
+            saveToHistoryUseCase = get(),
+            getPlaylistVideosUseCase = get()
         )
     }
     viewModel {
         HomeViewModel(
             getAllVideoHistoryUseCase = get(),
             clearAllVideoHistoryUseCase = get(),
-            saveToHistoryUseCase = get()
+            saveToHistoryUseCase = get(),
+            getPlaylistsUseCase = get(),
+            createPlaylistUseCase = get()
         )
     }
 }

@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "io.dala.pandanow"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "0.0.1"
+        versionName = "0.0.1beta01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -110,6 +110,7 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.gson)
+    implementation(libs.material3)
     //Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

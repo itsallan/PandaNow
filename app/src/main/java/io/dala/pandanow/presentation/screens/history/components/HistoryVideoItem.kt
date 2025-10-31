@@ -1,4 +1,4 @@
-package io.dala.pandanow.presentation.screens.home.components
+package io.dala.pandanow.presentation.screens.history.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.dala.pandanow.domain.models.VideoHistoryItem
 import io.dala.pandanow.presentation.components.formatDuration
+import io.dala.pandanow.presentation.screens.home.components.VideoThumbnail
 import io.dala.pandanow.presentation.utils.getTimeAgo
 
 @Composable

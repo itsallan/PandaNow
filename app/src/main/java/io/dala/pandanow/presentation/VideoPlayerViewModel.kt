@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import io.dala.pandanow.domain.usecase.GetPlaylistVideosUseCase
 
 @UnstableApi
 class VideoPlayerViewModel(
@@ -45,7 +46,8 @@ class VideoPlayerViewModel(
     videoCacheDataSource: VideoCacheDataSource,
     private val getSavedPositionUseCase: GetSavedPositionUseCase,
     private val saveCurrentPositionUseCase: SaveCurrentPositionUseCase,
-    private val saveToHistoryUseCase: SaveToHistoryUseCase
+    private val saveToHistoryUseCase: SaveToHistoryUseCase,
+    private val getPlaylistVideosUseCase: GetPlaylistVideosUseCase
 ) : AndroidViewModel(application) {
 
     @SuppressLint("StaticFieldLeak")
@@ -81,8 +83,23 @@ class VideoPlayerViewModel(
     val currentVideoQuality: StateFlow<Pair<String, TrackSelectionParameters>?> = _currentVideoQuality.asStateFlow()
     private val _currentSubtitle = MutableStateFlow<Pair<String, TrackSelectionParameters>?>(null)
     val currentSubtitle: StateFlow<Pair<String, TrackSelectionParameters>?> = _currentSubtitle.asStateFlow()
+    private val _currentPlaylist = MutableStateFlow<List<VideoHistoryItem>>(emptyList())
+    val currentPlaylist: StateFlow<List<VideoHistoryItem>> = _currentPlaylist.asStateFlow()
+
+    private val _currentPlaylistIndex = MutableStateFlow(0)
+    val currentPlaylistIndex: StateFlow<Int> = _currentPlaylistIndex.asStateFlow()
+
+    val isPlayingPlaylist: Boolean
+        get() = _currentPlaylist.value.isNotEmpty()
+
     init {
         initializePlayer()
+    }
+
+    private fun handlePlaybackEnd() {
+        if (isPlayingPlaylist) {
+            playNextVideo()
+        }
     }
 
     private fun initializePlayer() {
@@ -103,6 +120,7 @@ class VideoPlayerViewModel(
                     _isBuffering.value = playbackState == Player.STATE_BUFFERING
                     if (playbackState == Player.STATE_ENDED) {
                         saveCurrentPosition()
+                        handlePlaybackEnd()
                     }
                 }
 
@@ -135,7 +153,32 @@ class VideoPlayerViewModel(
         }
     }
 
-    fun setMediaItem(uri: String, subtitleUri: String? = null, adTagUri: String? = null) {
+    fun setMediaItem(
+        uri: String,
+        subtitleUri: String? = null,
+        adTagUri: String? = null,
+        playlistId: String? = null,
+        initialVideoIndex: Int = 0
+    ) {
+        if (playlistId != null) {
+            viewModelScope.launch {
+                val videos = getPlaylistVideosUseCase(playlistId)
+                _currentPlaylist.value = videos
+                _currentPlaylistIndex.value = initialVideoIndex
+
+                if (videos.isNotEmpty() && initialVideoIndex < videos.size) {
+                    val video = videos[initialVideoIndex]
+                    setSingleMediaItem(video.videoUrl, video.subtitleUrl, adTagUri)
+                }
+            }
+        } else {
+            _currentPlaylist.value = emptyList()
+            _currentPlaylistIndex.value = 0
+            setSingleMediaItem(uri, subtitleUri, adTagUri)
+        }
+    }
+
+    private fun setSingleMediaItem(uri: String, subtitleUri: String? = null, adTagUri: String? = null) {
         _currentUrl.value = uri
         val mediaSource = buildMediaSource(uri.toUri(), adTagUri, subtitleUri)
 
@@ -149,9 +192,7 @@ class VideoPlayerViewModel(
             }
             player.value?.playWhenReady = true
         }
-
         _errorMessage.value = null
-
         updateAvailableTracks(player.value?.currentTracks)
     }
 
@@ -288,6 +329,45 @@ class VideoPlayerViewModel(
                 }
             }
         }
+    }
+
+    fun playNextVideo() {
+        if (!isPlayingPlaylist) return
+
+        val nextIndex = _currentPlaylistIndex.value + 1
+        if (nextIndex < _currentPlaylist.value.size) {
+            val nextVideo = _currentPlaylist.value[nextIndex]
+
+            // Save current video's progress before switching
+            saveCurrentPosition()
+
+            _currentPlaylistIndex.value = nextIndex
+            setSingleMediaItem(nextVideo.videoUrl, nextVideo.subtitleUrl, null)
+        }
+    }
+
+    fun playPreviousVideo() {
+        if (!isPlayingPlaylist) return
+
+        val prevIndex = _currentPlaylistIndex.value - 1
+        if (prevIndex >= 0) {
+            val prevVideo = _currentPlaylist.value[prevIndex]
+
+            // Save current video's progress before switching
+            saveCurrentPosition()
+
+            _currentPlaylistIndex.value = prevIndex
+            setSingleMediaItem(prevVideo.videoUrl, prevVideo.subtitleUrl, null)
+        }
+    }
+
+    fun playVideoAtIndex(index: Int) {
+        if (!isPlayingPlaylist || index !in _currentPlaylist.value.indices || index == _currentPlaylistIndex.value) return
+
+        val video = _currentPlaylist.value[index]
+        saveCurrentPosition()
+        _currentPlaylistIndex.value = index
+        setSingleMediaItem(video.videoUrl, video.subtitleUrl, null)
     }
 
     fun toggleControlsVisibility() {

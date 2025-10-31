@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import io.dala.pandanow.presentation.screens.history.HistoryScreen
 import io.dala.pandanow.presentation.screens.home.HomeScreen
 import io.dala.pandanow.presentation.screens.player.VideoPlayerScreen
 import io.dala.pandanow.presentation.screens.settings.SettingsScreen
@@ -40,6 +41,9 @@ fun PandaNowNavHost() {
             }
             composable<SettingsRoute> {
                 SettingsScreen(navController)
+            }
+            composable<HistoryRoute> {
+                HistoryScreen(navController)
             }
         }
     }

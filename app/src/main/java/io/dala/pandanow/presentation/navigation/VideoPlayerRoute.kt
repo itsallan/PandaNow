@@ -7,4 +7,6 @@ data class VideoPlayerRoute(
     val title: String,
     val subtitle: String?,
     val subtitleUrl: String? = null,
+    val playlistId: String? = null,
+    val initialVideoIndex: Int = 0
 )

@@ -1,7 +1,10 @@
 package io.dala.pandanow.di
 
 import io.dala.pandanow.domain.usecase.ClearAllVideoHistoryUseCase
+import io.dala.pandanow.domain.usecase.CreatePlaylistUseCase
 import io.dala.pandanow.domain.usecase.GetAllVideoHistoryUseCase
+import io.dala.pandanow.domain.usecase.GetPlaylistVideosUseCase
+import io.dala.pandanow.domain.usecase.GetPlaylistsUseCase
 import io.dala.pandanow.domain.usecase.GetSavedPositionUseCase
 import io.dala.pandanow.domain.usecase.SaveCurrentPositionUseCase
 import io.dala.pandanow.domain.usecase.SaveToHistoryUseCase
@@ -13,4 +16,7 @@ val domainModule = module {
     factory { SaveToHistoryUseCase(repository = get()) }
     factory { GetAllVideoHistoryUseCase(repository = get()) }
     factory { ClearAllVideoHistoryUseCase(repository = get()) }
+    factory { CreatePlaylistUseCase(repository = get()) }
+    factory { GetPlaylistsUseCase(repository = get()) }
+    factory { GetPlaylistVideosUseCase(repository = get()) }
 }
