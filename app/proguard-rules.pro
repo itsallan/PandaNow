@@ -20,3 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+-dontwarn com.android.extensions.xr.**
+-dontwarn com.google.androidxr.**
+-dontwarn com.google.imp.splitengine.extensions.**
+
